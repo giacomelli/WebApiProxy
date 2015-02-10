@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
@@ -226,6 +227,12 @@ namespace WebApiProxy.Server
         private string GetConstantValue(FieldInfo constant)
         {
             var value = constant.GetRawConstantValue().ToString();
+
+            if (constant.FieldType == typeof(string))
+            {
+                value = string.Format(CultureInfo.InvariantCulture, "\"{0}\"", value);
+            }
+
             return value;
         }
 

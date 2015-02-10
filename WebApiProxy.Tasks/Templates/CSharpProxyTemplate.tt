@@ -127,6 +127,44 @@ namespace <#= Configuration.Namespace#>.Clients
 		partial void OnCreated();
 
 		/// <summary>
+		/// Called when client receive response
+		/// </summary>
+		partial void OnResponseReceived(HttpResponseMessage response);
+
+		/// <summary>
+		/// Called when client failed to read the result
+		/// </summary>
+		partial void OnReadResultFailed(HttpResponseMessage response, Exception ex);
+
+		/// <summary>
+        /// Reads the result from response content.
+        /// </summary>
+		protected virtual TResult ReadResult<TResult>(HttpResponseMessage response)
+        {
+            try
+            {
+				OnResponseReceived(response);
+                return response.Content.ReadAsAsync<TResult>().Result;
+            }
+            catch (Exception ex)
+            {
+                OnReadResultFailed(response, ex);
+                throw ex;
+            }
+        }
+
+		/// <summary>
+        /// Checks if the response message result was success.
+        /// </summary>
+		protected virtual void EnsureSuccess(HttpResponseMessage response)
+		{
+			if (!response.IsSuccessStatusCode)
+            {
+				throw ReadResult<ApiException>(response);
+            }
+		}
+
+		/// <summary>
         /// Releases the unmanaged resources and disposes of the managed resources.       
         /// </summary>
 		public void Dispose()
@@ -223,23 +261,12 @@ namespace <#= Configuration.Namespace#>.Clients
 			 var result = Task.Run(() => <#= method.Name #>Async(<#=parameterNameList#>)).Result;
 			 EnsureSuccess(result);			 
 			 <# if(!String.IsNullOrEmpty(method.ReturnType)) { #>			 			 
-             return result.Content.ReadAsAsync<<#= method.ReturnType #>>().Result;
+             return ReadResult<<#= method.ReturnType #>>(result);
 			 <# } #>
 		}
 
 <#}#>	    
-		#endregion
-
-		#region Private methods
-		private void EnsureSuccess(HttpResponseMessage result)
-		{
-			if (!result.IsSuccessStatusCode)
-            {
-				throw result.Content.ReadAsAsync<ApiException>().Result;
-            }
-		}
-		#endregion
-				
+		#endregion				
 	}
 <# } #>
 }

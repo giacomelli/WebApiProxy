@@ -14,3 +14,4 @@ WebApiProxy.Tasks.FunctionalTests/obj/Debug/TemporaryGeneratedFile_036C0B5B-1481
 WebApiProxy.Tasks.FunctionalTests/obj/
 WebApiProxy.Tasks.FunctionalTests/bin/Debug/WebApiProxy.config
 WebApiProxy.Tasks.FunctionalTests/bin/
+*.suo
